@@ -1,36 +1,95 @@
 let word = '';
 let sentences = [];
-let audio = [];
+let mp3 = [];
 let delay = 2000;
+let bdelay = 3000;
+
+function shuffle(a) {
+	b = [];
+	c = [];
+	for(let i = 0; i < a.length; ++ i) {
+		b.push(Math.random());
+		c.push(i);
+	}
+	c.sort((i, j) => { return b[i] - b[j]; });
+	d = [];
+	for(let i = 0; i < c.length; ++ i) {
+		d.push(a[c[i]]);
+	}
+	return d;
+}
+
+list = shuffle(list);
+
+let gi = 0, gj = 0;
+let handle = null;
+let audio = null;
+let paused = false;
 
 function iterate(i, j) {
+	gi = i;
+	gj = j; // record current position 
     if(i >= list.length) {
         return;
     }
     if(j == 0) {
         sentences = [];
-        audio = [];
+        mp3 = [];
         if(list[i] !== '') {
             let wa = list[i].split(',');
             word = wa[0];
             document.title = word;
-            for(let i = 1; i < wa.length; i += 2) {
-                sentences.push(unescape(wa[i]));
-                audio.push(wa[i+1]);
+            for(let k = 1; k < wa.length; k += 2) {
+                sentences.push(unescape(wa[k]));
+                mp3.push(wa[k+1]);
             }
-	    	document.body.innerHTML = `<div style='margin: auto; font-size: 20px;'><pre>${unescape(fanyi[word])}</pre></div>`
+	    	document.body.innerHTML = `<div class='exp'><pre>${i+1}/${list.length-1}.\t${unescape(fanyi[word])}</pre></div>`
         }
     } 
     if(j >= sentences.length) {
         return iterate(i+1, 0);
     }
     let s = sentences[j];
-    let a = new Audio(audio[j]);
+    audio = new Audio(mp3[j]);
 //    document.body.innerHTML = `<div style='margin: auto;'>${s}</div>`
-    a.onended = function() {
-        setTimeout(() => { iterate(i, j+1) }, delay);
+    audio.onended = function() {
+		audio.onended = null;
+		handle = setTimeout(() => { iterate(i, j+1) }, j+1 < sentences.length ? delay : bdelay);
     }
-    a.play();
+    audio.play();
+}
+
+
+function pause(e) {
+	if(e.key != ' ') {
+		return;
+	}
+	paused = !paused;
+	if(paused) {
+		document.title += ' - paused';
+	}
+	else {
+		document.title = document.title.substring(0, document.title.length - 9);
+	}
+	if(!paused) {
+		if(audio && !audio.ended) { // audio is still playing, schedule the next audio
+			audio.onended = function() {
+				handle = setTimeout(() => { iterate(gi, gj+1) }, j+1 < sentences.length ? delay : bdelay);
+			}
+		}
+		else { // audio is not playing, just play the next
+			iterate(gi, gj+1);
+		}
+	}
+	else {
+		if(audio && audio.onended) { // audio.onended has not been invoked;
+			audio.onended = null;
+		}
+		else { // audio.onended has been invoked, and we need to clear handle
+			clearTimeout(handle);
+		}
+	}
 }
 
 window.addEventListener('load', () => {iterate(0, 0);});
+window.onkeydown = (e) => {pause(e);}; 

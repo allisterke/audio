@@ -1,0 +1,10 @@
+
+pre {
+	white-space: pre-wrap;
+}
+
+.exp {
+	overflow: auto;
+	margin: auto;
+	font-size: 32px;
+}
