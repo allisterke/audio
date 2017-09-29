@@ -5,6 +5,13 @@ let delay = 2000;
 let bdelay = 3000;
 
 function shuffle(a) {
+	tl = [];
+	for(let i = 0; i < a.length; ++ i) {
+		if(a[i]) {
+			tl.push(a[i]);
+		}
+	}
+	a = tl;
 	b = [];
 	c = [];
 	for(let i = 0; i < a.length; ++ i) {
@@ -43,7 +50,7 @@ function iterate(i, j) {
                 sentences.push(unescape(wa[k]));
                 mp3.push(wa[k+1]);
             }
-	    	document.body.innerHTML = `<div class='exp'><pre>${i+1}/${list.length-1}.\t${unescape(fanyi[word])}</pre></div>`
+	    	document.body.innerHTML = `<div class='exp'><pre>${i+1}/${list.length}.\t${unescape(fanyi[word])}</pre></div>`
         }
     } 
     if(j >= sentences.length) {
@@ -54,8 +61,12 @@ function iterate(i, j) {
 //    document.body.innerHTML = `<div style='margin: auto;'>${s}</div>`
     audio.onended = function() {
 		audio.onended = null;
-		handle = setTimeout(() => { iterate(i, j+1) }, j+1 < sentences.length ? delay : bdelay);
+		handle = setTimeout(() => { iterate(i, j+1); }, j+1 < sentences.length ? delay : bdelay);
     }
+	audio.onerror = function() {
+		audio.onerror = null;
+		handle = setTimeout(() => { iterate(i, j+1); }, j+1 < sentences.length ? delay : bdelay);
+	}
     audio.play();
 }
 
@@ -72,9 +83,9 @@ function pause(e) {
 		document.title = document.title.substring(0, document.title.length - 9);
 	}
 	if(!paused) {
-		if(audio && !audio.ended) { // audio is still playing, schedule the next audio
+		if(audio && !audio.ended && (!audio.error || !audio.error.code)) { // audio is still playing, schedule the next audio
 			audio.onended = function() {
-				handle = setTimeout(() => { iterate(gi, gj+1) }, j+1 < sentences.length ? delay : bdelay);
+				handle = setTimeout(() => { iterate(gi, gj+1); }, j+1 < sentences.length ? delay : bdelay);
 			}
 		}
 		else { // audio is not playing, just play the next
@@ -82,8 +93,9 @@ function pause(e) {
 		}
 	}
 	else {
-		if(audio && audio.onended) { // audio.onended has not been invoked;
+		if(audio && audio.onended && audio.onerror) { // audio.onended has not been invoked;
 			audio.onended = null;
+			audio.onerror = null;
 		}
 		else { // audio.onended has been invoked, and we need to clear handle
 			clearTimeout(handle);

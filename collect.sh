@@ -4,7 +4,10 @@ while read -r word; do
         continue;
     fi
     audio=($word $(bash extract.sh $word))
-    echo -n ${audio[*]} | tr ' ' ','
+	for((i=2;i<${#audio[*]};i+=2)); do
+		wget -r -nH -c "${audio[$i]}"
+	done
+    echo -n ${audio[*]} | sed 's/http:\/\/www.entts.com\///g' | tr ' ' ','
     echo -n ';'
 done 
 echo '";'
