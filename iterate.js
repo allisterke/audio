@@ -11,19 +11,7 @@ function shuffle(a) {
 			tl.push(a[i]);
 		}
 	}
-	a = tl;
-	b = [];
-	c = [];
-	for(let i = 0; i < a.length; ++ i) {
-		b.push(Math.random());
-		c.push(i);
-	}
-	c.sort((i, j) => { return b[i] - b[j]; });
-	d = [];
-	for(let i = 0; i < c.length; ++ i) {
-		d.push(a[c[i]]);
-	}
-	return d;
+	return tl.sort();
 }
 
 list = shuffle(list);
@@ -103,7 +91,7 @@ function pause(e) {
 	if(paused) {
 		document.title += ' - paused';
 	}
-	else {
+	else if(document.title.endsWith(' - paused')) {
 		document.title = document.title.substring(0, document.title.length - 9);
 	}
 	if(!paused) {
@@ -127,5 +115,19 @@ function pause(e) {
 	}
 }
 
-window.addEventListener('load', () => {iterate(0, 0);});
+function getStartPosition() {
+	let url = window.location.href;
+	let pos = url.indexOf('?');
+	if(pos >= 0) {
+		let params = url.substr(pos+1).split(/[=&]/);
+		for(let i = 0; i < params.length; i += 2) {
+			if(params[i] === 'start') {
+				return parseInt(params[i+1]);
+			}
+		}
+	}
+	return 0;
+}
+
+window.addEventListener('load', () => {iterate(getStartPosition(), 0);});
 window.onkeydown = (e) => {pause(e);}; 
