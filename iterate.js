@@ -70,7 +70,7 @@ function iterate(i, j) {
     audio.play();
 }
 
-function stop()
+function stop() {
 	audio.pause();
 	if(audio.onended && audio.onerror) {
 		audio.onended = null;
