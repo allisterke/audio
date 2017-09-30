@@ -109,7 +109,7 @@ function pause(e) {
 	if(!paused) {
 		if(audio && !audio.ended && (!audio.error || !audio.error.code)) { // audio is still playing, schedule the next audio
 			audio.onended = function() {
-				handle = setTimeout(() => { iterate(gi, gj+1); }, j+1 < sentences.length ? delay : bdelay);
+				handle = setTimeout(() => { iterate(gi, gj+1); }, gj+1 < sentences.length ? delay : bdelay);
 			}
 		}
 		else { // audio is not playing, just play the next
