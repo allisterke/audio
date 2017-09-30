@@ -70,8 +70,32 @@ function iterate(i, j) {
     audio.play();
 }
 
+function stop()
+	audio.pause();
+	if(audio.onended && audio.onerror) {
+		audio.onended = null;
+		audio.onerror = null;
+	}
+	else {
+		clearTimeout(handle);
+	}
+}
 
 function pause(e) {
+	if(e.keyCode == 37) {
+		if(audio) {
+			stop();
+			return iterate(gi >= 1 ? gi-1 : gi, 0);
+		}
+		return;
+	}
+	if(e.keyCode == 39) {
+		if(audio) {
+			stop();
+			return iterate(gi+1, 0);
+		}
+		return;
+	}
 	if(e.key != ' ') {
 		return;
 	}
