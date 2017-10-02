@@ -4,7 +4,20 @@ let mp3 = [];
 let delay = 2000;
 let bdelay = 3000;
 
-function shuffle(a) {
+let params = function() {
+	let url = window.location.href;
+	let pos = url.indexOf('?');
+	let p = {};
+	if(pos >= 0) {
+		let ps = url.substr(pos+1).split(/[=&]/);
+		for(let i = 0; i < ps.length; i += 2) {
+			p[ps[i]] = ps[i+1];
+		}
+	}
+	return p; 
+}(); 
+
+function sort(a) {
 	tl = [];
 	for(let i = 0; i < a.length; ++ i) {
 		if(a[i]) {
@@ -14,7 +27,23 @@ function shuffle(a) {
 	return tl.sort();
 }
 
-list = shuffle(list);
+function shuffle(a) {
+	tl = [];
+	for(let i = 0; i < a.length; ++ i) {
+		if(a[i]) {
+			tl.push(a[i]);
+		}
+	}
+	for(let i = 0; i < tl.length; ++ i) {
+		let r = Math.floor(Math.random() * (tl.length - i));
+		let tmp = tl[i];
+		tl[i] = tl[i+r];
+		tl[i+r] = tmp;
+	}
+	return tl;
+}
+
+list = params['random'] === 'true' ? shuffle(list) : sort(list);
 
 let gi = 0, gj = 0;
 let handle = null;
@@ -116,17 +145,7 @@ function pause(e) {
 }
 
 function getStartPosition() {
-	let url = window.location.href;
-	let pos = url.indexOf('?');
-	if(pos >= 0) {
-		let params = url.substr(pos+1).split(/[=&]/);
-		for(let i = 0; i < params.length; i += 2) {
-			if(params[i] === 'start') {
-				return parseInt(params[i+1]);
-			}
-		}
-	}
-	return 0;
+	return params['start'] == null ? 0 : parseInt(params['start']);
 }
 
 window.addEventListener('load', () => {iterate(getStartPosition(), 0);});
